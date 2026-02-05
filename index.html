@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>𝐀𝐬𝐬𝐞𝐧⁹⁹車資計算器</title>
+
   <style>
     :root {
       --primary-color: #6B7C84;
@@ -13,6 +14,7 @@
       --text-color: #333333;
       --button-hover: #3B4B53;
     }
+
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: var(--bg-color);
@@ -23,6 +25,7 @@
       padding-top: 20px;
       color: var(--text-color);
     }
+
     nav {
       width: 100%;
       background: var(--primary-color);
@@ -38,7 +41,12 @@
       align-items: center;
       gap: 8px;
     }
-    nav img { width: 100px; height: auto; }
+
+    nav img {
+      width: 100px;
+      height: auto;
+    }
+
     .card {
       background: var(--card-bg);
       padding: 28px;
@@ -46,12 +54,22 @@
       width: 360px;
       box-shadow: 0 12px 30px rgba(0,0,0,0.12);
       margin-bottom: 20px;
-      transition: transform 0.2s;
     }
-    .card:hover { transform: translateY(-4px); }
-    h1 { font-size: 22px; margin-bottom: 18px; text-align: center; color: var(--primary-color); }
-    label { display: block; margin-top: 14px; font-size: 14px; }
-    input[type="text"], input[type="number"] {
+
+    h1 {
+      font-size: 22px;
+      margin-bottom: 18px;
+      text-align: center;
+      color: var(--primary-color);
+    }
+
+    label {
+      display: block;
+      margin-top: 14px;
+      font-size: 14px;
+    }
+
+    input[type="text"] {
       width: 100%;
       padding: 10px;
       margin-top: 6px;
@@ -59,9 +77,13 @@
       border: 1px solid #ccc;
       font-size: 14px;
     }
-    input[type="checkbox"] { margin-right: 6px; }
+
+    input[type="checkbox"] {
+      margin-right: 6px;
+    }
+
     button {
-      margin-top: 24px;
+      margin-top: 22px;
       width: 100%;
       padding: 12px;
       border: none;
@@ -71,15 +93,39 @@
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.3s, transform 0.2s;
     }
-    button:hover { background: var(--button-hover); transform: translateY(-2px); }
-    #map { width: 100%; height: 300px; border-radius: 20px; margin-top: 20px; }
-    .result { margin-top: 18px; font-size: 18px; text-align: center; font-weight: bold; white-space: pre-line; }
-    #tip { margin-top: 12px; font-size: 13px; color: #555; text-align: left; line-height: 1.5; }
+
+    button:hover {
+      background: var(--button-hover);
+    }
+
+    .result {
+      margin-top: 16px;
+      font-size: 18px;
+      text-align: center;
+      font-weight: bold;
+      white-space: pre-line;
+    }
+
+    #tip {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #555;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    #map {
+      width: 360px;
+      height: 300px;
+      border-radius: 20px;
+      margin-bottom: 30px;
+    }
   </style>
 </head>
+
 <body>
+
   <nav>
     <img src="A99LOGO.png" alt="ASSEN99 LOGO">
     𝐀𝐬𝐬𝐞𝐧⁹⁹車資計算器
@@ -97,9 +143,10 @@
     <label><input type="checkbox" id="avoidHighways"> 避開高速公路</label>
     <label><input type="checkbox" id="avoidTolls"> 避開收費道路</label>
 
+    <button onclick="calculateFare()">計算車資</button>
+
     <div class="result" id="result">—</div>
 
-    <!-- 小提示欄位 -->
     <div id="tip">
       💡 溫馨提醒：預估車資僅供參考<br>
       ▪️ 行車時間、路況皆會影響計費<br>
@@ -111,27 +158,18 @@
 
   <script>
     let map, directionsService, directionsRenderer;
-    let originAutocomplete, destinationAutocomplete;
 
     function initMap() {
       map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 25.0330, lng: 121.5654 },
         zoom: 13
       });
+
       directionsService = new google.maps.DirectionsService();
-      directionsRenderer = new google.maps.DirectionsRenderer({ map: map });
+      directionsRenderer = new google.maps.DirectionsRenderer({ map });
 
-      // 地址自動完成
-      originAutocomplete = new google.maps.places.Autocomplete(document.getElementById('origin'));
-      destinationAutocomplete = new google.maps.places.Autocomplete(document.getElementById('destination'));
-
-      // 即時計算
-      const inputs = ['origin','destination','avoidHighways','avoidTolls'];
-      inputs.forEach(id => {
-        const el = document.getElementById(id);
-        el.addEventListener('input', calculateFare);
-        el.addEventListener('change', calculateFare); // checkbox
-      });
+      new google.maps.places.Autocomplete(document.getElementById('origin'));
+      new google.maps.places.Autocomplete(document.getElementById('destination'));
     }
 
     function calculateFare() {
@@ -141,48 +179,50 @@
       const avoidTolls = document.getElementById('avoidTolls').checked;
 
       if (!origin || !destination) {
-        document.getElementById('result').innerText = '請輸入完整的起點和終點地址';
+        document.getElementById('result').innerText = '請輸入完整的起點與終點地址';
         return;
       }
 
       directionsService.route({
-        origin: origin,
-        destination: destination,
+        origin,
+        destination,
         travelMode: 'DRIVING',
-        avoidHighways: avoidHighways,
-        avoidTolls: avoidTolls
-      }, (response, status) => {
-        if (status === 'OK') {
-          directionsRenderer.setDirections(response);
-          const route = response.routes[0].legs[0];
-          const distanceKm = route.distance.value / 1000;
-          const travelTime = route.duration.value / 60;
-
-          const baseFare = 100;
-          const perKmRate = 15;
-          const perMinuteRate = 3;
-          const extraRateAfter16Km = 10;
-
-          let distanceFare = distanceKm <= 15
-            ? distanceKm * perKmRate
-            : 15 * perKmRate + (distanceKm - 15) * (perKmRate + extraRateAfter16Km);
-
-          const travelFare = travelTime * perMinuteRate;
-          const totalFare = baseFare + distanceFare + travelFare;
-
-          document.getElementById('result').innerText =
-            `距離：約 ${distanceKm.toFixed(1)} 公里\n` +
-            `行車時間：約 ${travelTime.toFixed(0)} 分鐘\n` +
-            `預估車資：${totalFare.toFixed(0)} 元`;
-        } else {
-          document.getElementById('result').innerText = '無法計算路線，請確認地址是否正確';
+        avoidHighways,
+        avoidTolls
+      }, (res, status) => {
+        if (status !== 'OK') {
+          document.getElementById('result').innerText = '路線計算失敗，請確認地址';
+          return;
         }
+
+        directionsRenderer.setDirections(res);
+
+        const leg = res.routes[0].legs[0];
+        const distanceKm = leg.distance.value / 1000;
+        const travelMin = leg.duration.value / 60;
+
+        const baseFare = 100;
+        const perKm = 15;
+        const perMin = 3;
+        const extraAfter15 = 10;
+
+        let distanceFare = distanceKm <= 15
+          ? distanceKm * perKm
+          : 15 * perKm + (distanceKm - 15) * (perKm + extraAfter15);
+
+        const total = baseFare + distanceFare + travelMin * perMin;
+
+        document.getElementById('result').innerText =
+          `距離：約 ${distanceKm.toFixed(1)} 公里\n` +
+          `時間：約 ${travelMin.toFixed(0)} 分鐘\n` +
+          `預估車資：${total.toFixed(0)} 元`;
       });
     }
   </script>
 
   <script async
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAL4_x2YFpSR0SY8ybPXLXy3U5-El1iHH4&callback=initMap&libraries=places">
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAL4_x2YFpSR0SY8ybPXLXy3U5-El1iHH4&libraries=places&callback=initMap">
   </script>
+
 </body>
 </html>
