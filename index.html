@@ -244,13 +244,12 @@
         `時間：約 ${min.toFixed(0)} 分鐘\n` +
         `預估車資：${fare.toFixed(0)} 元`;
 
+      // LINE 訊息只包含上下車地址
       const lineContainer = document.getElementById('lineMsgContainer');
       lineContainer.innerText =
 `🚕 ASSEN⁹⁹ 叫車需求
 起點：${o}
-終點：${d}
-距離：約 ${km.toFixed(1)} 公里
-預估車資：${fare.toFixed(0)} 元`;
+終點：${d}`;
     });
   }
 
