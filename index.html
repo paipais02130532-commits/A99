@@ -51,13 +51,16 @@
     .card:hover { transform: translateY(-4px); }
     h1 { font-size: 22px; margin-bottom: 18px; text-align: center; color: var(--primary-color); }
     label { display: block; margin-top: 14px; font-size: 14px; }
-    input {
+    input[type="text"], input[type="number"] {
       width: 100%;
       padding: 10px;
       margin-top: 6px;
       border-radius: 10px;
       border: 1px solid #ccc;
       font-size: 14px;
+    }
+    input[type="checkbox"] {
+      margin-right: 6px;
     }
     button {
       margin-top: 24px;
@@ -72,10 +75,7 @@
       cursor: pointer;
       transition: background 0.3s, transform 0.2s;
     }
-    button:hover {
-      background: var(--button-hover);
-      transform: translateY(-2px);
-    }
+    button:hover { background: var(--button-hover); transform: translateY(-2px); }
     #map {
       width: 100%;
       height: 300px;
@@ -106,6 +106,9 @@
     <label>終點地址</label>
     <input type="text" id="destination" placeholder="輸入終點地址">
 
+    <label><input type="checkbox" id="avoidHighways"> 避開高速公路</label>
+    <label><input type="checkbox" id="avoidTolls"> 避開收費道路</label>
+
     <button onclick="calculateFare()">計算車資</button>
 
     <div class="result" id="result">—</div>
@@ -125,16 +128,16 @@
       directionsService = new google.maps.DirectionsService();
       directionsRenderer = new google.maps.DirectionsRenderer({ map: map });
 
-      // 自動完成地址功能
-      const originInput = document.getElementById('origin');
-      const destinationInput = document.getElementById('destination');
-      originAutocomplete = new google.maps.places.Autocomplete(originInput);
-      destinationAutocomplete = new google.maps.places.Autocomplete(destinationInput);
+      // 地址自動完成
+      originAutocomplete = new google.maps.places.Autocomplete(document.getElementById('origin'));
+      destinationAutocomplete = new google.maps.places.Autocomplete(document.getElementById('destination'));
     }
 
     function calculateFare() {
       const origin = document.getElementById('origin').value;
       const destination = document.getElementById('destination').value;
+      const avoidHighways = document.getElementById('avoidHighways').checked;
+      const avoidTolls = document.getElementById('avoidTolls').checked;
 
       if (!origin || !destination) {
         document.getElementById('result').innerText = '請輸入完整的起點和終點地址';
@@ -144,11 +147,12 @@
       directionsService.route({
         origin: origin,
         destination: destination,
-        travelMode: 'DRIVING'
+        travelMode: 'DRIVING',
+        avoidHighways: avoidHighways,
+        avoidTolls: avoidTolls
       }, (response, status) => {
         if (status === 'OK') {
           directionsRenderer.setDirections(response);
-
           const route = response.routes[0].legs[0];
           const distanceKm = route.distance.value / 1000;
           const travelTime = route.duration.value / 60;
@@ -176,7 +180,6 @@
     }
   </script>
 
-  <!-- 使用你的 API Key -->
   <script async
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAL4_x2YFpSR0SY8ybPXLXy3U5-El1iHH4&callback=initMap&libraries=places">
   </script>
