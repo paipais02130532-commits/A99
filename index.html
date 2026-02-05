@@ -102,12 +102,26 @@
     .line-btn { background: #06C755; }
     .line-btn:hover { background: #04B14F; }
 
+    .copy-btn { background: #FFB400; margin-top: 6px; }
+    .copy-btn:hover { background: #FFA000; }
+
     .result {
       margin-top: 16px;
       font-size: 18px;
       text-align: center;
       font-weight: bold;
       white-space: pre-line;
+    }
+
+    #lineMsgContainer {
+      margin-top: 10px;
+      background: #fff;
+      border: 1px dashed #4F606A;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 14px;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
 
     #tip {
@@ -157,8 +171,10 @@
 
   <button onclick="calculateFare()">計算車資</button>
   <button class="line-btn" onclick="sendToLine()">📩 傳送到 LINE 官方</button>
+  <button class="copy-btn" onclick="copyLineMsg()">📋 複製訊息</button>
 
   <div class="result" id="result">—</div>
+  <div id="lineMsgContainer"></div>
 
   <div id="tip">
     💡 溫馨提醒：預估車資僅供參考<br>
@@ -227,6 +243,14 @@
         `距離：約 ${km.toFixed(1)} 公里\n` +
         `時間：約 ${min.toFixed(0)} 分鐘\n` +
         `預估車資：${fare.toFixed(0)} 元`;
+
+      const lineContainer = document.getElementById('lineMsgContainer');
+      lineContainer.innerText =
+`🚕 ASSEN⁹⁹ 叫車需求
+起點：${o}
+終點：${d}
+距離：約 ${km.toFixed(1)} 公里
+預估車資：${fare.toFixed(0)} 元`;
     });
   }
 
@@ -236,20 +260,19 @@
       return;
     }
 
-    const msg =
-`🚕 ASSEN⁹⁹ 叫車需求
-起點：${lastData.o}
-終點：${lastData.d}
-距離：約 ${lastData.km.toFixed(1)} 公里
-預估車資：${lastData.fare.toFixed(0)} 元`;
+    window.open(`https://line.me/R/ti/p/@751cgaza`, '_blank');
+    alert("LINE 官方聊天已開啟，請複製下方訊息並貼上傳送：\n\n" + document.getElementById('lineMsgContainer').innerText);
+  }
 
-    // 打開 LINE 官方聊天窗口（@751cgaza）並帶文字
-    window.open(
-      `https://line.me/R/ti/p/@751cgaza`,
-      '_blank'
-    );
-    // ⚠️ 用戶需要點擊一次送出
-    alert("LINE 官方聊天已開啟，請在 LINE 點擊「傳送」發送訊息");
+  function copyLineMsg() {
+    const lineContainer = document.getElementById('lineMsgContainer');
+    if (!lineContainer.innerText) {
+      alert('請先計算車資');
+      return;
+    }
+    navigator.clipboard.writeText(lineContainer.innerText)
+      .then(() => alert('訊息已複製到剪貼簿！'))
+      .catch(() => alert('複製失敗，請手動複製'));
   }
 </script>
 
