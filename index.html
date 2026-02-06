@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>𝐀𝐬𝐬𝐞𝐧⁹⁹車資試算</title>
+<title>𝐀𝐬𝐬𝐞𝐧⁹⁹ 車資試算</title>
 
 <style>
 :root{
@@ -24,7 +24,7 @@ body{
   margin:0;
 }
 
-/* ✅ 顶部 LOGO + 标题稳定布局 */
+/* 頂部 LOGO + 標題 */
 nav{
   width:100%;
   background:var(--primary);
@@ -53,6 +53,7 @@ nav img{width:100px;height:auto}
   border-radius:20px;
   box-shadow:0 12px 30px rgba(0,0,0,.12);
   margin-top:20px;
+  overflow: visible; /* 確保下拉選單不被裁掉 */
 }
 
 h1{
@@ -76,7 +77,7 @@ input[type="text"]{
   font-size:14px;
 }
 
-/* ✅ checkbox 不跑位 */
+/* checkbox */
 .checkbox-row{margin-top:12px}
 .checkbox-row label{
   display:flex;
@@ -105,7 +106,7 @@ button:hover{background:var(--hover)}
 .line-main:hover{background:#04B14F}
 
 .line-direct{background:var(--primary)}
-.line-direct:hover{background:var(--hover)}
+.line-direct:hover{background:#3B4B53}
 
 .result{
   margin-top:14px;
@@ -122,6 +123,7 @@ button:hover{background:var(--hover)}
   border-radius:10px;
   font-size:14px;
   white-space:pre-wrap;
+  display:none; /* 隱藏 */
 }
 
 #tip{
@@ -139,7 +141,7 @@ button:hover{background:var(--hover)}
   margin:20px 0 30px;
 }
 
-.pac-container{z-index:9999!important}
+.pac-container{z-index:9999 !important;}
 </style>
 </head>
 
@@ -147,7 +149,7 @@ button:hover{background:var(--hover)}
 
 <nav>
   <img src="A99LOGO.png" alt="ASSEN99 LOGO">
-  <div class="nav-title">𝐀𝐬𝐬𝐞𝐧⁹⁹車資試算</div>
+  <div class="nav-title">𝐀𝐬𝐬𝐞𝐧⁹⁹ 車資試算</div>
 </nav>
 
 <div class="card">
@@ -175,82 +177,94 @@ button:hover{background:var(--hover)}
 
 <button onclick="calculateFare()">計算車資</button>
 
-<button class="line-main" onclick="sendToLine()">
-一鍵複製📩傳送到 LINE 官方
-</button>
-
-<button class="line-direct" onclick="openLineOnly()">
-直接前往【 Assen⁹⁹ 】LINE官方
-</button>
+<button class="line-main" onclick="sendToLine()">一鍵複製📩傳送到 LINE 官方</button>
+<button class="line-direct" onclick="openLineOnly()">直接前往【Assen⁹⁹】LINE官方</button>
 
 <div class="result" id="result">—</div>
 <div id="lineMsgContainer"></div>
 
 <div id="tip">
 💡 溫馨提醒：預估車資僅供參考<br>
-▪️ 行車時間、路況皆會影響計費<br>
+▪️ 行車時間、路況皆會影響計費
 </div>
 </div>
 
 <div id="map"></div>
 
 <script>
-let map,ds,dr,lastData=null;
+let map, ds, dr, lastData = null;
 
 function clean(t){
- return t.replace(/\[?(台灣|台湾)\]?/g,'').replace(/,\s*/g,'').trim();
+  return t.replace(/\[?(台灣|台湾)\]?/g,'').replace(/,\s*/g,'').trim();
 }
 
 function initMap(){
- map=new google.maps.Map(document.getElementById("map"),{
-  center:{lat:25.033,lng:121.5654},zoom:13});
- ds=new google.maps.DirectionsService();
- dr=new google.maps.DirectionsRenderer({map});
- new google.maps.places.Autocomplete(origin);
- new google.maps.places.Autocomplete(destination);
+  const originInput = document.getElementById("origin");
+  const destinationInput = document.getElementById("destination");
+
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: {lat:25.033, lng:121.5654}, zoom:13
+  });
+
+  ds = new google.maps.DirectionsService();
+  dr = new google.maps.DirectionsRenderer({map: map});
+
+  new google.maps.places.Autocomplete(originInput);
+  new google.maps.places.Autocomplete(destinationInput);
 }
 
 function calculateFare(){
- const o=clean(origin.value),d=clean(destination.value);
- if(!o||!d){result.innerText='請輸入完整地址';return;}
+  const originVal = clean(document.getElementById("origin").value);
+  const destinationVal = clean(document.getElementById("destination").value);
 
- ds.route({
-  origin:o,
-  destination:d,
-  travelMode:'DRIVING',
-  avoidHighways:avoidHighways.checked,
-  avoidTolls:avoidTolls.checked
- },(r,s)=>{
-  if(s!=='OK'){result.innerText='路線計算失敗';return;}
-  dr.setDirections(r);
-  const leg=r.routes[0].legs[0];
-  const km=leg.distance.value/1000;
-  const min=leg.duration.value/60;
-  const fare=100+(km<=15?km*15:15*15+(km-15)*25)+min*3;
-  lastData={o,d};
-  result.innerText=
+  if(!originVal || !destinationVal){
+    document.getElementById("result").innerText = '請輸入完整地址';
+    return;
+  }
+
+  ds.route({
+    origin: originVal,
+    destination: destinationVal,
+    travelMode: 'DRIVING',
+    avoidHighways: document.getElementById("avoidHighways").checked,
+    avoidTolls: document.getElementById("avoidTolls").checked
+  }, (r, s) => {
+    if(s !== 'OK'){
+      document.getElementById("result").innerText = '路線計算失敗';
+      return;
+    }
+    dr.setDirections(r);
+    const leg = r.routes[0].legs[0];
+    const km = leg.distance.value / 1000;
+    const min = leg.duration.value / 60;
+    const fare = 100 + (km <= 15 ? km*15 : 15*15 + (km-15)*25) + min*3;
+
+    lastData = {originVal, destinationVal};
+
+    document.getElementById("result").innerText =
 `距離：約 ${km.toFixed(1)} 公里
 時間：約 ${min.toFixed(0)} 分鐘
 預估車資：${fare.toFixed(0)} 元`;
-  lineMsgContainer.innerText=
+
+    document.getElementById("lineMsgContainer").innerText =
 `🚕 ASSEN⁹⁹ 叫車需求
-起點：${o}
-終點：${d}`;
- });
+起點：${originVal}
+終點：${destinationVal}`;
+  });
 }
 
 function sendToLine(){
- if(!lastData){alert('請先計算車資');return;}
- const t=lineMsgContainer.innerText;
- navigator.clipboard.writeText(t).then(()=>{
-  if(confirm('已自動複製叫車需求，貼上後立即為您尋車。\n是否要打開 LINE 官方聊天？')){
-    window.open('https://line.me/R/ti/p/@751cgaza','_blank');
-  }
- });
+  if(!lastData){ alert('請先計算車資'); return; }
+  const t = document.getElementById("lineMsgContainer").innerText;
+  navigator.clipboard.writeText(t).then(()=>{
+    if(confirm('已自動複製叫車需求，貼上後立即為您尋車。\n是否要打開 LINE 官方聊天？')){
+      window.open('https://line.me/R/ti/p/@751cgaza','_blank');
+    }
+  });
 }
 
 function openLineOnly(){
- window.open('https://line.me/R/ti/p/@751cgaza','_blank');
+  window.open('https://line.me/R/ti/p/@751cgaza','_blank');
 }
 </script>
 
@@ -260,4 +274,3 @@ src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAL4_x2YFpSR0SY8ybPXLXy3U5
 
 </body>
 </html>
-
