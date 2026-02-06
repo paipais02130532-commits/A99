@@ -6,12 +6,11 @@
 <title>𝐀𝐬𝐬𝐞𝐧⁹⁹車資試算</title>
 
 <style>
-:root {
+:root{
   --primary:#6B7C84;
   --secondary:#4F606A;
   --bg:#F5F6F7;
   --card:#E3E8EB;
-  --text:#333;
   --hover:#3B4B53;
 }
 
@@ -45,9 +44,13 @@ nav img{width:100px}
 
 h1{text-align:center;color:var(--primary)}
 
-label{display:block;margin-top:14px;font-size:14px}
+label.title{
+  display:block;
+  margin-top:14px;
+  font-size:14px;
+}
 
-input{
+input[type="text"]{
   width:100%;
   padding:10px;
   margin-top:6px;
@@ -55,13 +58,23 @@ input{
   border:1px solid #ccc;
 }
 
+/* ✅ 关键修正：checkbox 稳定布局 */
 .checkbox-row{
-  display:flex;
-  align-items:center;
-  margin-top:10px;
+  margin-top:12px;
 }
 
-.checkbox-row input{margin-right:8px}
+.checkbox-row label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:14px;
+  cursor:pointer;
+  user-select:none;
+}
+
+.checkbox-row input{
+  flex-shrink:0;
+}
 
 button{
   width:100%;
@@ -78,14 +91,10 @@ button{
 
 button:hover{background:var(--hover)}
 
-.line-main{
-  background:#06C755;
-}
+.line-main{background:#06C755}
 .line-main:hover{background:#04B14F}
 
-.line-direct{
-  background:var(--primary);
-}
+.line-direct{background:var(--primary)}
 .line-direct:hover{background:var(--hover)}
 
 .result{
@@ -132,18 +141,24 @@ button:hover{background:var(--hover)}
 <div class="card">
 <h1>車資試算</h1>
 
-<label>起點地址</label>
-<input id="origin" placeholder="輸入起點地址">
+<label class="title">起點地址</label>
+<input type="text" id="origin" placeholder="輸入起點地址">
 
-<label>終點地址</label>
-<input id="destination" placeholder="輸入終點地址">
+<label class="title">終點地址</label>
+<input type="text" id="destination" placeholder="輸入終點地址">
 
 <div class="checkbox-row">
-<input type="checkbox" id="avoidHighways">避開高速公路
+  <label>
+    <input type="checkbox" id="avoidHighways">
+    避開高速公路
+  </label>
 </div>
 
 <div class="checkbox-row">
-<input type="checkbox" id="avoidTolls">避開收費道路
+  <label>
+    <input type="checkbox" id="avoidTolls">
+    避開收費道路
+  </label>
 </div>
 
 <button onclick="calculateFare()">計算車資</button>
@@ -176,7 +191,7 @@ function clean(t){
 }
 
 function initMap(){
- map=new google.maps.Map(mapDiv={document.getElementById("map")},{
+ map=new google.maps.Map(document.getElementById("map"),{
   center:{lat:25.033,lng:121.5654},zoom:13});
  ds=new google.maps.DirectionsService();
  dr=new google.maps.DirectionsRenderer({map});
@@ -201,7 +216,9 @@ function calculateFare(){
   const fare=100+(km<=15?km*15:15*15+(km-15)*25)+min*3;
   lastData={o,d};
   result.innerText=
-   `距離：約 ${km.toFixed(1)} 公里\n時間：約 ${min.toFixed(0)} 分鐘\n預估車資：${fare.toFixed(0)} 元`;
+`距離：約 ${km.toFixed(1)} 公里
+時間：約 ${min.toFixed(0)} 分鐘
+預估車資：${fare.toFixed(0)} 元`;
   lineMsgContainer.innerText=
 `🚕 ASSEN⁹⁹ 叫車需求
 起點：${o}
@@ -211,8 +228,8 @@ function calculateFare(){
 
 function sendToLine(){
  if(!lastData){alert('請先計算車資');return;}
- const text=lineMsgContainer.innerText;
- navigator.clipboard.writeText(text).then(()=>{
+ const t=lineMsgContainer.innerText;
+ navigator.clipboard.writeText(t).then(()=>{
   if(confirm('已自動複製叫車需求，貼上後立即為您尋車。\n是否要打開 LINE 官方聊天？')){
     window.open('https://line.me/R/ti/p/@751cgaza','_blank');
   }
